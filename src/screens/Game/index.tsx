@@ -13,9 +13,11 @@ import { GameParams } from '../../@types/navigation';
 import { DuoCard, DuoCardProps } from '../../components/DuoCard';
 import { Background } from '../../components/Background';
 import { Heading } from '../../components/Heading';
+import { DuoMatch } from '../../components/DuoMatch';
 
 export function Game() {
     const [ads, setAds] = useState<DuoCardProps[]>([]);
+    const [discordDuoSelected, setDiscordDuoSelected] = useState<string>('');
 
     const route = useRoute();
     const game = route.params as GameParams;
@@ -32,8 +34,10 @@ export function Game() {
         navigation.goBack();
     }
 
-    function handleConnect() {
-        console.log('on connect!!')
+    async function handleConnect(adsId: string) {
+        await fetch(`http://192.168.1.4:3333/ads/${adsId}/discord`)
+        .then(response => response.json())
+        .then(data => setDiscordDuoSelected(data.discord));
     }
 
     return (
@@ -74,7 +78,7 @@ export function Game() {
                         return (
                             <DuoCard
                                 data={item}
-                                onConnect={handleConnect}
+                                onConnect={() => handleConnect(item.id)}
                             />
                         );
                     }}
@@ -87,6 +91,12 @@ export function Game() {
                             Não há anúncios publicados ainda.
                         </Text>
                     )}
+                />
+
+                <DuoMatch
+                    visible={discordDuoSelected.length > 0}
+                    discord={discordDuoSelected}
+                    onClose={() => setDiscordDuoSelected('')}
                 />
             </SafeAreaView>
         </Background>
